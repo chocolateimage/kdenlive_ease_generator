@@ -16,6 +16,8 @@ In the Command Line, paste `pip install -r requirements.txt` and hit `ENTER`.
 
 [Video](https://i.imgur.com/vpQiKhF.mp4)
 
+[Tutorial (YouTube)](https://youtu.be/1c1yGZ14XYo)
+
 ### Linux
 
 Debian: `sudo apt-get install python3`
