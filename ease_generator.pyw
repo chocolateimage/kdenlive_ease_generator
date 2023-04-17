@@ -18,6 +18,8 @@ def lerp(a: float, b: float, t: float) -> float:
         50 == lerp(0, 100, 0.5)
         4.2 == lerp(1, 5, 0.8)
     """
+    if a == b:
+        return a
     return (1 - t) * a + t * b
 
 
