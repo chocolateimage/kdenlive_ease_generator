@@ -12,10 +12,9 @@
 * In this folder do: `pip install -r requirements.txt`
 
 Tip: you can run the Python command by opening the folder in the File Explorer, then typing `cmd` in the address bar to open the command line.
+In the Command Line, paste `pip install -r requirements.txt` and hit `ENTER`.
 
 [Video](https://i.imgur.com/vpQiKhF.mp4)
-
-In the Command Line, paste `pip install -r requirements.txt` and hit `ENTER`.
 
 ### Linux
 
