@@ -1,20 +1,20 @@
 # Kdenlive ease generator
 
+## Tutorial
+[![image](https://user-images.githubusercontent.com/95003834/232554753-3cdaf3b1-ccf3-4f2f-9245-c556973f1851.png)](https://youtu.be/1c1yGZ14XYo)
+
 ## Install
 * Download the zip or clone the folder to the lcoation of your choice on your computer.
 * After extracting, follow the instructions below for your operating system.
-![image](https://user-images.githubusercontent.com/95003834/232543469-c229a002-a6db-41ae-97d6-be9d44649748.png)
 
 ### Windows
 
-* Install Python from https://www.python.org/downloads/ if not already
+* Install Python from https://www.python.org/downloads/ if you haven't already
 * In the installation, make sure to select "Add Python 3.XX to PATH"
 * In this folder do: `pip install -r requirements.txt`
 
 Tip: you can run the Python command by opening the folder in the File Explorer, then typing `cmd` in the address bar to open the command line.
-In the Command Line, paste `pip install -r requirements.txt` and hit `ENTER`.
-
-[Video](https://i.imgur.com/vpQiKhF.mp4)
+In the Command Line, paste `pip install -r requirements.txt` and hit `ENTER`. [Video](https://i.imgur.com/vpQiKhF.mp4)
 
 [Tutorial (YouTube)](https://youtu.be/1c1yGZ14XYo)
 
