@@ -1,0 +1,5 @@
+PyQt5==5.15.6
+PyQt5-Qt5==5.15.2
+PyQt5-sip==12.11.1
+Pillow==9.0.1
+clipboard==0.0.4
