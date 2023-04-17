@@ -4,7 +4,7 @@
 [![image](https://user-images.githubusercontent.com/95003834/232554753-3cdaf3b1-ccf3-4f2f-9245-c556973f1851.png)](https://youtu.be/1c1yGZ14XYo)
 
 ## Install
-* Download the zip or clone the folder to the lcoation of your choice on your computer.
+* Download the zip or clone the folder to the location of your choice on your computer.
 * After extracting, follow the instructions below for your operating system.
 
 ### Windows
