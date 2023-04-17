@@ -16,7 +16,8 @@
 Tip: you can run the Python command by opening the folder in the File Explorer, then typing `cmd` in the address bar to open the command line.
 In the Command Line, paste `pip install -r requirements.txt` and hit `ENTER`.
 
-[Video](https://i.imgur.com/vpQiKhF.mp4)
+See [Windows Tutorial Video (YouTube)](https://youtu.be/-T2nPA9YXzk)
+[Quick Video](https://i.imgur.com/vpQiKhF.mp4)
 
 ### Linux
 
@@ -25,7 +26,7 @@ Debian: `sudo apt-get install python3`
 * In this folder do: `pip install -r requirements.txt`
 * To allow execution: `chmod +x ease_generator.pyw`
 
-See [Tutorial Video (YouTube)](https://youtu.be/1c1yGZ14XYo)
+See [Linux Tutorial Video (YouTube)](https://youtu.be/1c1yGZ14XYo)
 
 ## Usage
 
