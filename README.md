@@ -17,12 +17,15 @@ Tip: you can run the Python command by opening the folder in the File Explorer, 
 In the Command Line, paste `pip install -r requirements.txt` and hit `ENTER`.
 
 See [Windows Tutorial Video (YouTube)](https://youtu.be/-T2nPA9YXzk)
+
 [Quick Video](https://i.imgur.com/vpQiKhF.mp4)
 
 ### Linux
 
 Debian: `sudo apt-get install python3`
 
+* PyQT5 pip package not needed so remove it from `requirements.txt`
+* To install PyQT5 for python do: `sudo apt-get install python3-pyqt5`
 * In this folder do: `pip install -r requirements.txt`
 * To allow execution: `chmod +x ease_generator.pyw`
 
