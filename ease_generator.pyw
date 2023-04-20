@@ -5,8 +5,10 @@ abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
 import json
+import re
 import sys
 from decimal import Decimal
+from decimal import InvalidOperation as DecimalInvalidOperation
 from typing import Tuple
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
@@ -112,39 +114,57 @@ class ClipWidget:
         self.wid = wid
         uic.loadUi("ui/clip.ui", self.wid)
 
-        self.wid.btnInfer.clicked.connect(self.infer_clip)
+        self.wid.btnPasteFps.clicked.connect(self.paste_fps)
+        self.wid.btnPasteDuration.clicked.connect(self.paste_duration)
 
-    def parse_clip(self) -> Tuple[Decimal, int]:
-        root = minidom.parseString(clipboard.paste())
-        fps = Decimal(root.attributes['fps'])
-        total_frames = int(root.attributes['duration'])
+    def parse_clip_xml(self) -> Tuple[Decimal, int]:
+        root = minidom.parseString(clipboard.paste()).documentElement
+        fps = Decimal(root.attributes['fps'].value)
+        total_frames = int(root.attributes['duration'].value)
 
         return fps, total_frames
 
-    def infer_clip(self):
+    def on_paste_error(self, field_name, e):
+        assert e, False
+        template = 'Error parsing clip data for \'{0}\'.  Message:\n{1}'
+
+        msgbox = QtWidgets.QMessageBox()
+        msgbox.setWindowTitle('Inference Failed')
+        msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+        msgbox.setText(template.format(field_name, e))
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msgbox.exec()
+
+        print('error parsing clip:\n' + str(e))
+
+
+    def on_paste(self, field_name):
         try:
-            fps, total_frames = self.parse_clip()
-            # for `SS.FF` notation
-            # minor_frames = total_frames % fps
-            # full_seconds = (total_frames - minor_frames) / fps
-            # duration = full_seconds * fps + minor_frames
+            fps, total_frames = self.parse_clip_xml()
+        except ExpatError as e:
+            self.on_paste_error(field_name, e)
+
+            return None, None
+
+        return fps, total_frames
+
+    def paste_duration(self):
+        fps, total_frames = self.on_paste('duration')
+        # for `SS.FF` notation
+        # minor_frames = total_frames % fps
+        # full_seconds = (total_frames - minor_frames) / fps
+        # duration = full_seconds * fps + minor_frames
+
+        if fps is not None and total_frames is not None:
             duration = total_frames / fps
-            self.wid.numFps.setValue(int(fps))
+
             self.wid.numDuration.setValue(duration)
 
-        except ExpatError as e:
-            assert e, False
+    def paste_fps(self):
+        fps, _ = self.on_paste('FPS')
 
-            msgbox = QtWidgets.QMessageBox()
-            msgbox.setWindowTitle('Inference Failed')
-            msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
-            msgbox.setText('Error parsing clip data.  Message:\n{0}'.format(e))
-            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            msgbox.exec()
-
-            print('error parsing clip:\n' + str(e))
-
-            return
+        if fps is not None:
+            self.wid.numFps.setValue(int(fps))
 
 
 class RectWidget:
@@ -162,6 +182,13 @@ class RectWidget:
             "opacity": self.wid.numOpacity.value() / 100,
         }
 
+    def set_data(self, position, size, opacity):
+        self.wid.numPosX.setValue(position['x'])
+        self.wid.numPosY.setValue(position['y'])
+        self.wid.numSizeX.setValue(size['x'])
+        self.wid.numSizeY.setValue(size['y'])
+        self.wid.numOpacity.setValue(opacity)
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -171,6 +198,8 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in ease_options:
             self.cbEaseType.addItem(i["name"])
         self.btnGenerate.clicked.connect(self.on_generate_click)
+        self.btnPasteStart.clicked.connect(self.on_paste_start)
+        self.btnPasteEnd.clicked.connect(self.on_paste_end)
         self.startrect = self.load_rect(self.widStartRect)
         self.endrect = self.load_rect(self.widEndRect)
         self.create_easepreview()
@@ -220,6 +249,62 @@ class MainWindow(QtWidgets.QMainWindow):
         qim = QtGui.QImage(data, img.width,img.height, QtGui.QImage.Format_RGB888)"""
         pix = QtGui.QPixmap("preview.png")
         self.imgEasePreview.setPixmap(pix)
+
+    def parse_keyframe(self, json_str):
+        keyframe = json.loads(clipboard.paste())
+        SIZE_OFFSET=2
+        position = {}
+        size = {}
+
+        for item in keyframe:
+            if item.get('DisplayName', '') != 'Rectangle':
+                continue
+
+            try:
+                fields = re.split(r'[\s=]', item['value'])[1:]
+                for axis, idx in {'x': 0, 'y': 1}.items():
+                    position[axis] = int(fields[idx])
+                    size[axis] = int(fields[idx + SIZE_OFFSET])
+
+                opacity = Decimal(fields[4])
+
+                return position, size, opacity
+
+            except (IndexError, DecimalInvalidOperation):
+                break
+
+        raise SyntaxError('Invalid rectangle data in clipboard')
+
+    def on_paste_point_error(self, point, e):
+        assert e, False
+        template = 'Error parsing clip data for \'{0}\'.  Message:\n{1}'
+
+        msgbox = QtWidgets.QMessageBox()
+        msgbox.setWindowTitle('Inference Failed')
+        msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+        msgbox.setText(template.format(point, e))
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msgbox.exec()
+
+        print('error parsing clip:\n' + str(e))
+
+    def on_paste_point(self, point, widget):
+        try:
+            position, size, opacity = self.parse_keyframe(clipboard.paste())
+        except (json.JSONDecodeError, SyntaxError) as e:
+            self.on_paste_point_error(point, e)
+
+            return
+
+        widget.set_data(position, size, int(opacity * 100))
+
+
+    def on_paste_start(self):
+        self.on_paste_point('start', self.startrect)
+
+    def on_paste_end(self):
+        self.on_paste_point('end', self.endrect)
+
 
     def on_generate_click(self):
         easetype = ease_options[self.cbEaseType.currentIndex()]
