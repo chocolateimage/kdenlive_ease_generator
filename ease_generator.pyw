@@ -7,6 +7,7 @@ import clipboard
 import json
 import easingslist as easings # to avoid conflicts
 import sys
+import math
 from PyQt5 import QtWidgets, uic, QtGui
 
 from PIL import Image, ImageDraw
@@ -150,10 +151,15 @@ ease_options = [
     },
 ]
 
+def get_frames(duration,fps):
+    if window.durationTypeFF.isChecked():
+        return int((fps * math.floor(duration)) + round(duration % 1,2) * 100)
+    else:
+        return int(fps * duration)
 
 def generate_values(easetype,duration,data,fps):
     t = []
-    max_range = int(duration * fps) - 1
+    max_range = get_frames(duration,fps) - 1
     for i in range(0,max_range + 1):
         value01 = i / max_range
         value = easetype(value01)
@@ -163,6 +169,7 @@ def generate_values(easetype,duration,data,fps):
         rect += " " + str(lerp(data["start"]["opacity"],data["end"]["opacity"],value))
         t.append(str(i) + "=" + rect)
     return ";".join(t)
+
 def generate_json(easetype,duration,data,fps):
     return [
         {
@@ -172,7 +179,7 @@ def generate_json(easetype,duration,data,fps):
             "min":0,
             "name":"rect",
             "opacity":True,
-            "out":int(duration * fps),
+            "out":get_frames(duration,fps),
             "type":7,
             "value":generate_values(easetype["func"],duration,data,fps)
         }

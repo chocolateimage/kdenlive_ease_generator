@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>460</width>
-    <height>600</height>
+    <height>630</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>460</width>
-    <height>600</height>
+    <height>630</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>460</width>
-    <height>600</height>
+    <height>630</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
    <property name="geometry">
     <rect>
      <x>280</x>
-     <y>560</y>
+     <y>590</y>
      <width>171</width>
      <height>28</height>
     </rect>
@@ -46,8 +46,8 @@
     <rect>
      <x>0</x>
      <y>10</y>
-     <width>451</width>
-     <height>541</height>
+     <width>487</width>
+     <height>571</height>
     </rect>
    </property>
    <layout class="QFormLayout" name="formLayout">
@@ -101,48 +101,80 @@
      </widget>
     </item>
     <item row="2" column="0">
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>Duration
+decimal type:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
      <widget class="QLabel" name="label_2">
       <property name="text">
        <string>Ease type:</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
+    <item row="3" column="1">
      <widget class="QComboBox" name="cbEaseType"/>
     </item>
-    <item row="3" column="0">
+    <item row="4" column="0">
      <widget class="QLabel" name="label_3">
       <property name="text">
        <string>Start:</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
+    <item row="4" column="1">
+     <widget class="QWidget" name="widStartRect" native="true"/>
+    </item>
+    <item row="5" column="0">
      <widget class="QLabel" name="label_4">
       <property name="text">
        <string>End:</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="1">
+    <item row="5" column="1">
      <widget class="QWidget" name="widEndRect" native="true"/>
     </item>
-    <item row="3" column="1">
-     <widget class="QWidget" name="widStartRect" native="true"/>
-    </item>
-    <item row="5" column="0">
+    <item row="6" column="0">
      <widget class="QLabel" name="label_6">
       <property name="text">
        <string>Ease preview:</string>
       </property>
      </widget>
     </item>
-    <item row="5" column="1">
+    <item row="6" column="1">
      <widget class="QLabel" name="imgEasePreview">
       <property name="text">
        <string/>
       </property>
      </widget>
+    </item>
+    <item row="2" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QRadioButton" name="durationTypeMS">
+        <property name="text">
+         <string>As milliseconds (SS.MS)</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="durationTypeFF">
+        <property name="text">
+         <string>As frames (SS.FF)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
