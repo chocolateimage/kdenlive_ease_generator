@@ -86,22 +86,8 @@
     <item row="1" column="1">
      <widget class="QComboBox" name="cbEaseType"/>
     </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Start:</string>
-      </property>
-     </widget>
-    </item>
     <item row="2" column="1">
      <widget class="QWidget" name="widStartRect" native="true"/>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>End:</string>
-      </property>
-     </widget>
     </item>
     <item row="3" column="1">
      <widget class="QWidget" name="widEndRect" native="true"/>
@@ -115,10 +101,84 @@
     </item>
     <item row="4" column="1">
      <widget class="QLabel" name="imgEasePreview">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>200</height>
+       </size>
+      </property>
       <property name="text">
        <string/>
       </property>
      </widget>
+    </item>
+    <item row="2" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="lblStart">
+        <property name="text">
+         <string>Start:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnPasteStart">
+        <property name="text">
+         <string>Paste</string>
+        </property>
+        <property name="icon">
+         <iconset theme="edit-paste"/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="vertSpaceStart">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QLabel" name="lblEnd">
+        <property name="text">
+         <string>End:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnPasteEnd">
+        <property name="text">
+         <string>Paste</string>
+        </property>
+        <property name="icon">
+         <iconset theme="edit-paste"/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="vertSpaceEnd">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
