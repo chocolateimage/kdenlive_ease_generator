@@ -7,10 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>569</width>
-    <height>84</height>
+    <height>69</height>
    </rect>
   </property>
   <layout class="QFormLayout" name="clipLayout">
+   <property name="verticalSpacing">
+    <number>0</number>
+   </property>
    <property name="leftMargin">
     <number>8</number>
    </property>
@@ -51,7 +54,7 @@
      <item>
       <widget class="QPushButton" name="btnPasteFps">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -104,7 +107,7 @@
      <item>
       <widget class="QPushButton" name="btnPasteDuration">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
