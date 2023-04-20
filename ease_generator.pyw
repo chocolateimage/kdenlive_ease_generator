@@ -154,8 +154,8 @@ ease_options = [
 def generate_values(easetype,duration,data,fps):
     t = []
     max_range = int(duration * fps)
-    for i in range(0,max_range + 1):
-        value01 = i / max_range
+    for i in range(0, max_range):
+        value01 = i / (max_range - 1)
         value = easetype(value01)
         rect = str(int(lerp(data["start"]["x"],data["end"]["x"],value))) + " " + str(int(lerp(data["start"]["y"],data["end"]["y"],value)))
         rect += " " + str(int(lerp(data["start"]["width"],data["end"]["width"],value)))
@@ -234,8 +234,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.imgEasePreview.setPixmap(pix)
     def on_generate_click(self):
         easetype = ease_options[self.cbEaseType.currentIndex()]
-        
-        
+
+
         tocopy = json.dumps(generate_json(
             easetype,
             self.numDuration.value(),
