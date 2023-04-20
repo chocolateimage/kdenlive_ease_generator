@@ -72,7 +72,7 @@ def generate_values(easetype, duration, data, fps):
     max_range = int(duration * fps)
 
     for i in range(0, max_range + 1):
-        value01 = i / max_range
+        value01 = i / (max_range + 1)
         value = easetype(value01)
         rect = (
             str(int(lerp(data["start"]["x"], data["end"]["x"], value)))
