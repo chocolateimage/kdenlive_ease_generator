@@ -153,7 +153,7 @@ ease_options = [
 
 def generate_values(easetype,duration,data,fps):
     t = []
-    max_range = int(duration * fps)
+    max_range = int(duration * fps) - 1
     for i in range(0,max_range + 1):
         value01 = i / max_range
         value = easetype(value01)
@@ -162,7 +162,6 @@ def generate_values(easetype,duration,data,fps):
         rect += " " + str(int(lerp(data["start"]["height"],data["end"]["height"],value)))
         rect += " " + str(lerp(data["start"]["opacity"],data["end"]["opacity"],value))
         t.append(str(i) + "=" + rect)
-        print(t[len(t) - 1])
     return ";".join(t)
 def generate_json(easetype,duration,data,fps):
     return [
