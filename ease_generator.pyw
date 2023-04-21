@@ -19,6 +19,8 @@ from xml.parsers.expat import ExpatError
 from pathlib import Path
 import re
 
+import math
+
 def lerp(a: float, b: float, t: float) -> float:
     """Linear interpolate on the scale given by a to b, using t as the point on that scale.
     Examples
@@ -159,19 +161,25 @@ ease_options = [
 ]
 
 
+def get_frames(duration,fps):
+    if window.durationTypeFF.isChecked():
+        return int((fps * math.floor(duration)) + round(duration % 1,2) * 100)
+    else:
+        return int(fps * duration)
+
 def generate_values(easetype,duration,data,fps):
     t = []
-    max_range = int(duration * fps)
-    for i in range(0, max_range):
-        value01 = i / (max_range - 1)
+    max_range = get_frames(duration,fps) - 1
+    for i in range(0, max_range + 1):
+        value01 = i / (max_range)
         value = easetype(value01)
         rect = str(int(lerp(data["start"]["x"],data["end"]["x"],value))) + " " + str(int(lerp(data["start"]["y"],data["end"]["y"],value)))
         rect += " " + str(int(lerp(data["start"]["width"],data["end"]["width"],value)))
         rect += " " + str(int(lerp(data["start"]["height"],data["end"]["height"],value)))
         rect += " " + str(lerp(data["start"]["opacity"],data["end"]["opacity"],value))
         t.append(str(i) + "=" + rect)
-        print(t[len(t) - 1])
     return ";".join(t)
+
 def generate_json(easetype,duration,data,fps):
     return [
         {
@@ -181,7 +189,7 @@ def generate_json(easetype,duration,data,fps):
             "min":0,
             "name":"rect",
             "opacity":True,
-            "out":int(duration * fps),
+            "out":get_frames(duration,fps),
             "type":7,
             "value":generate_values(easetype["func"],duration,data,fps)
         }
@@ -192,14 +200,10 @@ class ClipWidget:
     def __init__(self, wid):
         self.wid = wid
         uic.loadUi("ui/clip.ui", self.wid)
-        paste_icon = QtGui.QIcon(str(Path(dname) / 'ui/paste2.png'))
         buttons = (self.wid.btnPasteFps, self.wid.btnPasteDuration)
         handlers = (self.paste_fps, self.paste_duration)
         for i in range(2):
             buttons[i].clicked.connect(handlers[i])
-            buttons[i].setIcon(paste_icon)
-            buttons[i].setText('')
-            buttons[i].maximumWidth = 16
     def parse_clip_xml(self) -> Tuple[Decimal, int]:
         root = minidom.parseString(clipboard.paste()).documentElement
         fps = Decimal(root.attributes['fps'].value)
@@ -278,14 +282,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_easepreview()
         self.cbEaseType.currentIndexChanged.connect(self.create_easepreview)
     def setup_rects(self):
-        paste_icon = QtGui.QIcon(str(Path(dname) / 'ui/paste2.png'))
         buttons = (self.btnPasteStart, self.btnPasteEnd)
         handlers = (self.on_paste_start, self.on_paste_end)
         for i in range(2):
             buttons[i].clicked.connect(handlers[i])
-            buttons[i].setIcon(paste_icon)
-            buttons[i].setText('')
-            buttons[i].maximumWidth = 16
     def load_clip(self, wid):
         cw = ClipWidget(wid)
         return cw
@@ -329,7 +329,7 @@ class MainWindow(QtWidgets.QMainWindow):
             },
             self.clip.get_fps()
         ))
-        tocopy
+        
         clipboard.copy(tocopy)
     def parse_keyframe(self, json_str):
         keyframe = json.loads(clipboard.paste())

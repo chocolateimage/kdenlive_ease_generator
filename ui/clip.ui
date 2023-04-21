@@ -59,9 +59,15 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>72</width>
+         <width>32</width>
          <height>16777215</height>
         </size>
        </property>
@@ -69,7 +75,7 @@
         <string>Paste project FPS</string>
        </property>
        <property name="text">
-        <string>Paste</string>
+        <string/>
        </property>
        <property name="icon">
         <iconset theme="edit-paste">
@@ -112,9 +118,15 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>72</width>
+         <width>32</width>
          <height>16777215</height>
         </size>
        </property>
@@ -122,7 +134,7 @@
         <string>Paste clip duration</string>
        </property>
        <property name="text">
-        <string>Paste</string>
+        <string/>
        </property>
        <property name="icon">
         <iconset theme="edit-paste">
