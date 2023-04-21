@@ -7,10 +7,19 @@ import clipboard
 import json
 import easingslist as easings # to avoid conflicts
 import sys
-import math
 from PyQt5 import QtWidgets, uic, QtGui
 
 from PIL import Image, ImageDraw
+
+from decimal import Decimal
+from decimal import InvalidOperation as DecimalInvalidOperation
+from typing import Tuple
+from xml.dom import minidom
+from xml.parsers.expat import ExpatError
+from pathlib import Path
+import re
+
+import math
 
 def lerp(a: float, b: float, t: float) -> float:
     """Linear interpolate on the scale given by a to b, using t as the point on that scale.
@@ -151,6 +160,7 @@ ease_options = [
     },
 ]
 
+
 def get_frames(duration,fps):
     if window.durationTypeFF.isChecked():
         return int((fps * math.floor(duration)) + round(duration % 1,2) * 100)
@@ -160,8 +170,8 @@ def get_frames(duration,fps):
 def generate_values(easetype,duration,data,fps):
     t = []
     max_range = get_frames(duration,fps) - 1
-    for i in range(0,max_range + 1):
-        value01 = i / max_range
+    for i in range(0, max_range + 1):
+        value01 = i / (max_range)
         value = easetype(value01)
         rect = str(int(lerp(data["start"]["x"],data["end"]["x"],value))) + " " + str(int(lerp(data["start"]["y"],data["end"]["y"],value)))
         rect += " " + str(int(lerp(data["start"]["width"],data["end"]["width"],value)))
@@ -185,6 +195,58 @@ def generate_json(easetype,duration,data,fps):
         }
     ]
 
+
+class ClipWidget:
+    def __init__(self, wid):
+        self.wid = wid
+        uic.loadUi("ui/clip.ui", self.wid)
+        buttons = (self.wid.btnPasteFps, self.wid.btnPasteDuration)
+        handlers = (self.paste_fps, self.paste_duration)
+        for i in range(2):
+            buttons[i].clicked.connect(handlers[i])
+    def parse_clip_xml(self) -> Tuple[Decimal, int]:
+        root = minidom.parseString(clipboard.paste()).documentElement
+        fps = Decimal(root.attributes['fps'].value)
+        total_frames = int(root.attributes['duration'].value)
+        return fps, total_frames
+    def on_paste_error(self, field_name, e):
+        assert e, False
+        template = 'Error parsing clip data for \'{0}\'.  Message:\n{1}'
+        msgbox = QtWidgets.QMessageBox()
+        msgbox.setWindowTitle('Inference Failed')
+        msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+        msgbox.setText(template.format(field_name, e))
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msgbox.exec()
+        print('error parsing clip:\n' + str(e))
+    def on_paste(self, field_name):
+        try:
+            fps, total_frames = self.parse_clip_xml()
+        except ExpatError as e:
+            self.on_paste_error(field_name, e)
+            return None, None
+        return fps, total_frames
+    def paste_duration(self):
+        fps, total_frames = self.on_paste('duration')
+        # for `SS.FF` notation
+        # minor_frames = total_frames % fps
+        # full_seconds = (total_frames - minor_frames) / fps
+        # duration = full_seconds * fps + minor_frames
+
+        if fps is not None and total_frames is not None:
+            duration = total_frames / fps
+
+            self.wid.numDuration.setValue(duration)
+    def paste_fps(self):
+        fps, _ = self.on_paste('FPS')
+
+        if fps is not None:
+            self.wid.numFps.setValue(int(fps))
+    def get_duration(self):
+        return self.wid.numDuration.value()
+    def get_fps(self):
+        return self.wid.numFps.value()
+
 class RectWidget():
     def __init__(self,wid):
         self.wid = wid
@@ -198,6 +260,12 @@ class RectWidget():
             "height":self.wid.numSizeY.value(),
             "opacity":self.wid.numOpacity.value() / 100
         }
+    def set_data(self, position, size, opacity):
+        self.wid.numPosX.setValue(position['x'])
+        self.wid.numPosY.setValue(position['y'])
+        self.wid.numSizeX.setValue(size['x'])
+        self.wid.numSizeY.setValue(size['y'])
+        self.wid.numOpacity.setValue(opacity)
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -207,10 +275,20 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in ease_options:
             self.cbEaseType.addItem(i["name"])
         self.btnGenerate.clicked.connect(self.on_generate_click)
+        self.clip = self.load_clip(self.widClip)
+        self.setup_rects()
         self.startrect = self.load_rect(self.widStartRect)
         self.endrect = self.load_rect(self.widEndRect)
         self.create_easepreview()
         self.cbEaseType.currentIndexChanged.connect(self.create_easepreview)
+    def setup_rects(self):
+        buttons = (self.btnPasteStart, self.btnPasteEnd)
+        handlers = (self.on_paste_start, self.on_paste_end)
+        for i in range(2):
+            buttons[i].clicked.connect(handlers[i])
+    def load_clip(self, wid):
+        cw = ClipWidget(wid)
+        return cw
     def load_rect(self,wid):
         rw = RectWidget(wid)
         return rw
@@ -240,19 +318,58 @@ class MainWindow(QtWidgets.QMainWindow):
         self.imgEasePreview.setPixmap(pix)
     def on_generate_click(self):
         easetype = ease_options[self.cbEaseType.currentIndex()]
-        
-        
+
+
         tocopy = json.dumps(generate_json(
             easetype,
-            self.numDuration.value(),
+            self.clip.get_duration(),
             {
                 "start":self.startrect.get_data(),
                 "end":self.endrect.get_data()
             },
-            self.numFps.value()
+            self.clip.get_fps()
         ))
+        
         clipboard.copy(tocopy)
-
+    def parse_keyframe(self, json_str):
+        keyframe = json.loads(clipboard.paste())
+        SIZE_OFFSET=2
+        position = {}
+        size = {}
+        for item in keyframe:
+            if item.get('DisplayName', '') != 'Rectangle':
+                continue
+            try:
+                fields = re.split(r'[\s=]', item['value'])[1:]
+                for axis, idx in {'x': 0, 'y': 1}.items():
+                    position[axis] = int(fields[idx])
+                    size[axis] = int(fields[idx + SIZE_OFFSET])
+                opacity = Decimal(fields[4])
+                return position, size, opacity
+            except (IndexError, DecimalInvalidOperation):
+                break
+        raise SyntaxError('Invalid rectangle data in clipboard')
+    def on_paste_point_error(self, point, e):
+        assert e, False
+        template = 'Error parsing clip data for \'{0}\'.  Message:\n{1}'
+        msgbox = QtWidgets.QMessageBox()
+        msgbox.setWindowTitle('Inference Failed')
+        msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+        msgbox.setText(template.format(point, e))
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msgbox.exec()
+        print('error parsing clip:\n' + str(e))
+    def on_paste_point(self, point, widget):
+        try:
+            position, size, opacity = self.parse_keyframe(clipboard.paste())
+        except (json.JSONDecodeError, SyntaxError) as e:
+            self.on_paste_point_error(point, e)
+            return
+        widget.set_data(position, size, int(opacity * 100))
+    def on_paste_start(self):
+        self.on_paste_point('start', self.startrect)
+    def on_paste_end(self):
+        self.on_paste_point('end', self.endrect)
 
 
 if __name__ == "__main__":
