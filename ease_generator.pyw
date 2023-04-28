@@ -246,6 +246,10 @@ class ClipWidget:
         return self.wid.numDuration.value()
     def get_fps(self):
         return self.wid.numFps.value()
+    def set_duration(self,duration):
+        return self.wid.numDuration.setValue(duration)
+    def set_fps(self,fps):
+        return self.wid.numFps.setValue(fps)
 
 class RectWidget():
     def __init__(self,wid):
@@ -265,7 +269,13 @@ class RectWidget():
         self.wid.numPosY.setValue(position['y'])
         self.wid.numSizeX.setValue(size['x'])
         self.wid.numSizeY.setValue(size['y'])
-        self.wid.numOpacity.setValue(opacity)
+        self.wid.numOpacity.setValue(int(opacity * 100))
+    def load_data_from_json(self, js):
+        self.set_data(
+            {"x":js["x"],"y":js["y"]},
+            {"x":js["width"],"y":js["height"]},
+            js["opacity"]
+        )
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -281,6 +291,68 @@ class MainWindow(QtWidgets.QMainWindow):
         self.endrect = self.load_rect(self.widEndRect)
         self.create_easepreview()
         self.cbEaseType.currentIndexChanged.connect(self.create_easepreview)
+        self.cbPresets.currentIndexChanged.connect(self.presets_selected)
+        self.reload_presets()
+    def get_presets(self):
+        presets = {}
+        try:
+            f = open("presets.json")
+            presets = json.loads(f.read())
+            f.close()
+        except Exception:
+            pass
+        return presets
+    def reload_presets(self):
+        presets = self.get_presets()
+        self.cbPresets.setCurrentIndex(0)
+        self.cbPresets.clear()
+        self.cbPresets.addItem("--- Presets ---")
+        self.cbPresets.addItem("Reload")
+        self.cbPresets.addItem("Save...")
+        self.cbPresets.addItem("-----------------")
+        for i in presets.keys():
+            self.cbPresets.addItem(i)
+    def presets_selected(self):
+        ind = self.cbPresets.currentIndex()
+        if ind <= 0:
+            return
+        if ind == 2:
+            t,b = QtWidgets.QInputDialog.getText(self,"Save as...","Enter name for preset")
+            if b:
+                tosave = {
+                    "duration":self.clip.get_duration(),
+                    "durationTypeFrame":self.durationTypeFF.isChecked(),
+                    "fps":self.clip.get_fps(),
+                    "easeType":self.cbEaseType.currentIndex(),
+                    "start":self.startrect.get_data(),
+                    "end":self.endrect.get_data()
+                }
+                presets = self.get_presets()
+                presets[t] = tosave
+                try:
+                    json_dumped = json.dumps(presets)
+                    f = open("presets.json","w+")
+                    f.write(json_dumped)
+                    f.close()
+                except Exception as e:
+                    msgbox = QtWidgets.QMessageBox()
+                    msgbox.setWindowTitle('Error saving')
+                    msgbox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+                    msgbox.setText("Error saving template: " + str(e))
+                    msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                    msgbox.exec()
+        if ind > 3:
+            preset_index = ind - 4
+            toload = list(self.get_presets().values())[preset_index]
+            self.clip.set_duration(toload["duration"])
+            window.durationTypeFF.setChecked(toload["durationTypeFrame"])
+            window.durationTypeMS.setChecked(not toload["durationTypeFrame"])
+            self.clip.set_fps(toload["fps"])
+            self.cbEaseType.setCurrentIndex(toload["easeType"])
+            self.startrect.load_data_from_json(toload["start"])
+            self.endrect.load_data_from_json(toload["end"])
+        self.reload_presets()
+                
     def setup_rects(self):
         buttons = (self.btnPasteStart, self.btnPasteEnd)
         handlers = (self.on_paste_start, self.on_paste_end)
@@ -365,7 +437,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except (json.JSONDecodeError, SyntaxError) as e:
             self.on_paste_point_error(point, e)
             return
-        widget.set_data(position, size, int(opacity * 100))
+        widget.set_data(position, size, opacity)
     def on_paste_start(self):
         self.on_paste_point('start', self.startrect)
     def on_paste_end(self):

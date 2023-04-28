@@ -220,8 +220,19 @@ decimal type:</string>
     </item>
    </layout>
   </widget>
+  <widget class="QComboBox" name="cbPresets">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>660</y>
+     <width>131</width>
+     <height>24</height>
+    </rect>
+   </property>
+  </widget>
   <zorder>formLayoutWidget</zorder>
   <zorder>btnGenerate</zorder>
+  <zorder>cbPresets</zorder>
  </widget>
  <resources/>
  <connections/>
