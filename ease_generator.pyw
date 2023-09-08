@@ -11,12 +11,10 @@ from PyQt5 import QtWidgets, uic, QtGui
 
 from PIL import Image, ImageDraw
 
-from decimal import Decimal
 from decimal import InvalidOperation as DecimalInvalidOperation
 from typing import Tuple
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
-from pathlib import Path
 import re
 
 import math
@@ -204,9 +202,9 @@ class ClipWidget:
         handlers = (self.paste_fps, self.paste_duration)
         for i in range(2):
             buttons[i].clicked.connect(handlers[i])
-    def parse_clip_xml(self) -> Tuple[Decimal, int]:
+    def parse_clip_xml(self) -> Tuple[float, int]:
         root = minidom.parseString(clipboard.paste()).documentElement
-        fps = Decimal(root.attributes['fps'].value)
+        fps = float(root.attributes['fps'].value)
         total_frames = int(root.attributes['duration'].value)
         return fps, total_frames
     def on_paste_error(self, field_name, e):
@@ -406,21 +404,24 @@ class MainWindow(QtWidgets.QMainWindow):
     def parse_keyframe(self, json_str):
         keyframe = json.loads(clipboard.paste())
         SIZE_OFFSET=2
-        position = {}
-        size = {}
         for item in keyframe:
             if item.get("type", -1) != 7:
                 continue
             try:
-                fields = re.split(r'[\s=]', item['value'])[1:]
-                for axis, idx in {'x': 0, 'y': 1}.items():
-                    position[axis] = int(fields[idx])
-                    size[axis] = int(fields[idx + SIZE_OFFSET])
-                opacity = Decimal(fields[4])
-                return position, size, opacity
+                keyframes = []
+                for keyframe in item["value"].split(";"):
+                    fields = re.split(r'[\s=]', keyframe)[1:]
+                    position = {}
+                    size = {}
+                    for axis, idx in {'x': 0, 'y': 1}.items():
+                        position[axis] = int(fields[idx])
+                        size[axis] = int(fields[idx + SIZE_OFFSET])
+                    opacity = float(fields[4])
+                    keyframes.append([position,size,opacity])
+                return keyframes
             except (IndexError, DecimalInvalidOperation):
                 break
-        raise SyntaxError('Invalid rectangle data in clipboard')
+        raise Exception('Invalid rectangle data in clipboard')
     def on_paste_point_error(self, point, e):
         assert e, False
         template = 'Error parsing clip data for \'{0}\'.  Message:\n{1}'
@@ -431,17 +432,17 @@ class MainWindow(QtWidgets.QMainWindow):
         msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
         msgbox.exec()
         print('error parsing clip:\n' + str(e))
-    def on_paste_point(self, point, widget):
+    def on_paste_point(self, point, widget, index):
         try:
-            position, size, opacity = self.parse_keyframe(clipboard.paste())
-        except (json.JSONDecodeError, SyntaxError) as e:
+            position, size, opacity = self.parse_keyframe(clipboard.paste())[index]
+        except (json.JSONDecodeError, Exception) as e:
             self.on_paste_point_error(point, e)
             return
         widget.set_data(position, size, opacity)
     def on_paste_start(self):
-        self.on_paste_point('start', self.startrect)
+        self.on_paste_point('start', self.startrect, 0)
     def on_paste_end(self):
-        self.on_paste_point('end', self.endrect)
+        self.on_paste_point('end', self.endrect, -1)
 
 
 if __name__ == "__main__":
