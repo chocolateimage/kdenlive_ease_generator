@@ -409,7 +409,7 @@ class MainWindow(QtWidgets.QMainWindow):
         position = {}
         size = {}
         for item in keyframe:
-            if item.get('DisplayName', '') != 'Rectangle':
+            if item.get("type", -1) != 7:
                 continue
             try:
                 fields = re.split(r'[\s=]', item['value'])[1:]
