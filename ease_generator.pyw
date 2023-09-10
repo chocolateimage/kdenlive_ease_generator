@@ -263,10 +263,12 @@ class RectWidget():
             "opacity":self.wid.numOpacity.value() / 100
         }
     def set_data(self, position, size, opacity):
-        self.wid.numPosX.setValue(position['x'])
-        self.wid.numPosY.setValue(position['y'])
-        self.wid.numSizeX.setValue(size['x'])
-        self.wid.numSizeY.setValue(size['y'])
+        self.set_data(position["x"],position["y"],size["x"],size["y"],opacity)
+    def set_data(self, x,y, width, height, opacity):
+        self.wid.numPosX.setValue(x)
+        self.wid.numPosY.setValue(y)
+        self.wid.numSizeX.setValue(width)
+        self.wid.numSizeY.setValue(height)
         self.wid.numOpacity.setValue(int(opacity * 100))
     def load_data_from_json(self, js):
         self.set_data(
@@ -283,6 +285,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in ease_options:
             self.cbEaseType.addItem(i["name"])
         self.btnGenerate.clicked.connect(self.on_generate_click)
+        self.btnSwap.clicked.connect(self.on_swap_click)
         self.clip = self.load_clip(self.widClip)
         self.setup_rects()
         self.startrect = self.load_rect(self.widStartRect)
@@ -443,6 +446,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.on_paste_point('start', self.startrect, 0)
     def on_paste_end(self):
         self.on_paste_point('end', self.endrect, -1)
+    def on_swap_click(self):
+        startdata = self.startrect.get_data()
+        enddata = self.endrect.get_data()
+        self.startrect.set_data(enddata["x"],enddata["y"],enddata["width"],enddata["height"],enddata["opacity"])
+        self.endrect.set_data(startdata["x"],startdata["y"],startdata["width"],startdata["height"],startdata["opacity"])
 
 
 if __name__ == "__main__":
