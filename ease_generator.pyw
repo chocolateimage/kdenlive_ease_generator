@@ -262,7 +262,7 @@ class RectWidget():
             "height":self.wid.numSizeY.value(),
             "opacity":self.wid.numOpacity.value() / 100
         }
-    def set_data(self, position, size, opacity):
+    def set_data_packed(self, position, size, opacity):
         self.set_data(position["x"],position["y"],size["x"],size["y"],opacity)
     def set_data(self, x,y, width, height, opacity):
         self.wid.numPosX.setValue(x)
@@ -271,7 +271,7 @@ class RectWidget():
         self.wid.numSizeY.setValue(height)
         self.wid.numOpacity.setValue(int(opacity * 100))
     def load_data_from_json(self, js):
-        self.set_data(
+        self.set_data_packed(
             {"x":js["x"],"y":js["y"]},
             {"x":js["width"],"y":js["height"]},
             js["opacity"]
@@ -441,7 +441,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except (json.JSONDecodeError, Exception) as e:
             self.on_paste_point_error(point, e)
             return
-        widget.set_data(position, size, opacity)
+        widget.set_data_packed(position, size, opacity)
     def on_paste_start(self):
         self.on_paste_point('start', self.startrect, 0)
     def on_paste_end(self):
