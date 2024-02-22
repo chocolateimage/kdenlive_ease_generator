@@ -382,7 +382,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 lastpixel = xy
             except Exception:
                 pass
-        img = img.resize((img.width // scale, img.height // scale), resample=Image.ANTIALIAS)
+        img = img.resize((img.width // scale, img.height // scale), resample=Image.LANCZOS)
         img.save("preview.png")
         """img = img.convert("RGB")
         data = img.tobytes("raw","RGB")
