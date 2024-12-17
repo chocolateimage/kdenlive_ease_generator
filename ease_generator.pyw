@@ -384,9 +384,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 pass
         img = img.resize((img.width // scale, img.height // scale), resample=Image.LANCZOS)
         img.save("preview.png")
-        """img = img.convert("RGB")
-        data = img.tobytes("raw","RGB")
-        qim = QtGui.QImage(data, img.width,img.height, QtGui.QImage.Format_RGB888)"""
         pix = QtGui.QPixmap("preview.png")
         self.imgEasePreview.setPixmap(pix)
     def on_generate_click(self):
