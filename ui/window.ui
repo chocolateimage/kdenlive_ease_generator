@@ -109,6 +109,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Paste from &quot;Copy keyframes&quot;</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -145,6 +148,9 @@
           <width>32</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Paste from &quot;Copy keyframes&quot;</string>
         </property>
         <property name="text">
          <string/>
