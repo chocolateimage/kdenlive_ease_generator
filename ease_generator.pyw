@@ -7,7 +7,10 @@ import pyperclip
 import json
 import easingslist as easings # to avoid conflicts
 import sys
-from PyQt5 import QtWidgets, uic, QtGui
+try:
+    from PyQt6 import QtWidgets, uic, QtGui
+except Exception:
+    from PyQt5 import QtWidgets, uic, QtGui
 
 from PIL import Image, ImageDraw
 
@@ -453,4 +456,4 @@ class MainWindow(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
-    app.exec_()
+    sys.exit(app.exec())
