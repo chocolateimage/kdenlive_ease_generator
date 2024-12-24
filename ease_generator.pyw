@@ -3,7 +3,7 @@ import os
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
-import clipboard
+import pyperclip
 import json
 import easingslist as easings # to avoid conflicts
 import sys
@@ -203,7 +203,7 @@ class ClipWidget:
         for i in range(2):
             buttons[i].clicked.connect(handlers[i])
     def parse_clip_xml(self) -> Tuple[float, int]:
-        root = minidom.parseString(clipboard.paste()).documentElement
+        root = minidom.parseString(pyperclip.paste()).documentElement
         fps = float(root.attributes['fps'].value)
         total_frames = int(root.attributes['duration'].value)
         return fps, total_frames
@@ -400,9 +400,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clip.get_fps()
         ))
         
-        clipboard.copy(tocopy)
+        pyperclip.copy(tocopy)
     def parse_keyframe(self, json_str):
-        keyframe = json.loads(clipboard.paste())
+        keyframe = json.loads(json_str)
         SIZE_OFFSET=2
         for item in keyframe:
             if item.get("type", -1) != 7:
@@ -434,7 +434,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print('error parsing clip:\n' + str(e))
     def on_paste_point(self, point, widget, index):
         try:
-            position, size, opacity = self.parse_keyframe(clipboard.paste())[index]
+            position, size, opacity = self.parse_keyframe(pyperclip.paste())[index]
         except (json.JSONDecodeError, Exception) as e:
             self.on_paste_point_error(point, e)
             return
